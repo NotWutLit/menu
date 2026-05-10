@@ -1,112 +1,147 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { router } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function HealthHomeScreen() {
+  const bmiData = { value: 22.5, category: "Bình thường", color: "#22c55e" };
 
-export default function TabTwoScreen() {
+  const handleViewBMI = () => {
+    router.push({
+      pathname: "/bmi-result",
+      params: {
+        bmi: "22.5",
+        height: "170",
+        weight: "65",
+        category: "Bình thường",
+      },
+    });
+  };
+
+  const handleViewMeal = (mealId: string, mealName: string) => {
+    router.push({
+      pathname: "/meal/[id]",
+      params: { id: mealId, name: mealName },
+    });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.greeting}>Xin chào, An! 👋</Text>
+        <Text style={styles.subtitle}>Hôm nay bạn thế nào?</Text>
+
+        {/* Card BMI */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>💪 Chỉ số BMI</Text>
+          <Text style={styles.bmiValue}>{bmiData.value}</Text>
+          <Text style={[styles.bmiCategory, { color: bmiData.color }]}>
+            🟢 {bmiData.category}
+          </Text>
+          <Pressable style={styles.linkButton} onPress={handleViewBMI}>
+            <Text style={styles.linkButtonText}>Xem chi tiết →</Text>
+          </Pressable>
+        </View>
+
+        {/* Card Hoạt động */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>🏃 Hoạt động hôm nay</Text>
+          <View style={styles.activityRow}>
+            <View style={styles.activityItem}>
+              <Text style={styles.activityValue}>8,245</Text>
+              <Text style={styles.activityLabel}>🚶 Bước đi</Text>
+            </View>
+            <View style={styles.activityItem}>
+              <Text style={styles.activityValue}>1,850</Text>
+              <Text style={styles.activityLabel}>🔥 Calories</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Gợi ý thực đơn */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>🍽️ Gợi ý thực đơn hôm nay</Text>
+
+          <Pressable
+            style={styles.mealSuggestion}
+            onPress={() => handleViewMeal("1", "Phở bò")}
+          >
+            <Text style={styles.mealName}>Phở bò</Text>
+            <Text style={styles.mealCal}>450 kcal →</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.mealSuggestion}
+            onPress={() => handleViewMeal("2", "Salad rau")}
+          >
+            <Text style={styles.mealName}>Salad rau</Text>
+            <Text style={styles.mealCal}>180 kcal →</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.linkButton, { marginTop: 12 }]}
+            onPress={() => router.push("/(tabs)/meals")}
+          >
+            <Text style={styles.linkButtonText}>Xem toàn bộ menu →</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    padding: 20,
+    paddingTop: 20,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  greeting: { fontSize: 26, fontWeight: "bold", color: "#1a1a2e" },
+  subtitle: { fontSize: 14, color: "#666", marginTop: 4, marginBottom: 20 },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1a1a2e",
+    marginBottom: 12,
+  },
+  bmiValue: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#1a1a2e",
+    textAlign: "center",
+  },
+  bmiCategory: { fontSize: 16, textAlign: "center", marginTop: 4 },
+  linkButton: {
+    backgroundColor: "#eef2ff",
+    borderRadius: 8,
+    paddingVertical: 10,
+    marginTop: 16,
+    alignItems: "center",
+  },
+  linkButtonText: { color: "#4f46e5", fontWeight: "600" },
+  activityRow: { flexDirection: "row", justifyContent: "space-around" },
+  activityItem: { alignItems: "center" },
+  activityValue: { fontSize: 24, fontWeight: "bold", color: "#1a1a2e" },
+  activityLabel: { fontSize: 13, color: "#666", marginTop: 4 },
+  mealSuggestion: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  mealName: { fontSize: 15, color: "#374151" },
+  mealCal: { fontSize: 13, color: "#9ca3af" },
 });

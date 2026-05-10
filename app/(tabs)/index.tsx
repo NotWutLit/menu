@@ -1,98 +1,216 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const MAP_RESULT_BMI: {
+  [key: string]: {
+    text: string;
+    advice: string;
+    color: string;
+  };
+} = {
+  under: {
+    text: "Thiếu cân",
+    advice: "Bạn cần bổ sung thêm dinh dưỡng. Hãy tham khảo ý kiến bác sĩ.",
+    color: "#3b82f6",
+  },
+  normal: {
+    text: "Bình thường",
+    advice: "Bạn có chỉ số BMI khỏe mạnh! Hãy duy trì lối sống hiện tại.",
+    color: "#22c55e",
+  },
+  over: {
+    text: "Thừa cân",
+    advice: "Hãy tăng cường vận động và điều chỉnh chế độ ăn uống.",
+    color: "#f59e0b",
+  },
+  obese: {
+    text: "Béo phì",
+    advice:
+      "Bạn nên tham khảo ý kiến bác sĩ để có kế hoạch giảm cân phù hợp và an toàn.",
+    color: "#ef4444",
+  },
+};
 
-export default function HomeScreen() {
+const BMICalculator = () => {
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [result, setResult] = useState<{
+    bmi: string;
+    text: string;
+    advice: string;
+    color: string;
+  } | null>(null);
+
+  const calculateBMI = () => {
+    const h = Number(height) / 100;
+    const w = Number(weight);
+    // falsy: 0, null, undefined, "", []
+    if (!h || !w || h <= 0 || w <= 0) {
+      Alert.alert("Lỗi", "Vui lòng nhập thông tin hợp lệ");
+    }
+    // < 18.5	Thiếu cân	🔵 #3b82f6
+    // 18.5 – 24.9	Bình thường	🟢 #22c55e
+    // 25 – 29.9	Thừa cân	🟠 #f59e0b
+    // ≥ 30	Béo phì	🔴 #ef4444
+    const bmi: number = w / h ** 2;
+    let type = "under";
+    if (bmi >= 30) {
+      type = "obese";
+    } else if (bmi >= 25) {
+      type = "over";
+    } else if (bmi >= 18.5) {
+      type = "normal";
+    }
+    setResult({
+      bmi: bmi.toFixed(1),
+      text: MAP_RESULT_BMI[type].text,
+      advice: MAP_RESULT_BMI[type].advice,
+      color: MAP_RESULT_BMI[type].color,
+    });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.title}>💪 BMI Calculator</Text>
+        <Text style={styles.subtitle}>Kiểm tra sức khỏe của bạn</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <View style={styles.form}>
+          <Text style={styles.label}>📏 Chiều cao (cm)</Text>
+          <TextInput
+            value={height}
+            onChangeText={(value) => setHeight(value)}
+            style={styles.input}
+            placeholder="VD: 170cm"
+          />
+          <Text style={styles.label}>⚖️ Cân nặng (kg)</Text>
+          <TextInput
+            value={weight}
+            onChangeText={(value) => setWeight(value)}
+            style={styles.input}
+            placeholder="VD: 65kg"
+          />
+          <Pressable style={styles.button} onPress={calculateBMI}>
+            <Text style={styles.buttonText}>🔍 TÍNH BMI</Text>
+          </Pressable>
+        </View>
+
+        {result && (
+          <View style={styles.resultCard}>
+            <View style={[styles.bmiCircle, { borderColor: result.color }]}>
+              <Text style={[styles.bmiNumber, { color: result.color }]}>
+                {result.bmi}
+              </Text>
+            </View>
+            <Text style={[styles.txtResult, { color: result.color }]}>
+              {result.text}
+            </Text>
+            <Text style={styles.advice}>{result.advice}</Text>
+          </View>
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
-}
+};
+
+export default BMICalculator;
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    padding: 20,
+    backgroundColor: "#d6f9e1",
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#1a1a2e",
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  form: {
+    marginTop: 30,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    elevation: 3,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    padding: 14,
+    fontSize: 16,
+    marginBottom: 20,
+    borderRadius: 10,
+  },
+  button: {
+    backgroundColor: "#6366f1",
+    borderRadius: 10,
+    padding: 14,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  resultCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    elevation: 3,
+    alignItems: "center",
+    gap: 8,
+  },
+  bmiCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: "green",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bmiNumber: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "green",
+  },
+  txtResult: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "green",
+  },
+  advice: {
+    fontSize: 14,
+    color: "#374151",
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
